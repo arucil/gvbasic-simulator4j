@@ -1,0 +1,30 @@
+package core;
+
+public interface E {
+    public static final int SYNTAX = 1,
+            STMT_DUPLICATE = 2,
+            REDIM_ARRAY = 3,
+            TYPE_MISMATCH = 4,
+            ILLEGAL_QUANTITY = 5,
+            DIVISION_BY_ZERO = 6,
+            BAD_SUBSCRIPT = 7,
+            NEXT_WITHOUT_FOR = 8,
+            RETURN_WITHOUT_GOSUB = 9,
+            OUT_OF_DATA = 10,
+            UNDEFD_STMT = 11,
+            UNDEFD_FUNC = 12,
+            WEND_WITHOUT_WHILE = 13,
+            FILE_NUMBER = 14,
+            FILE_REOPEN = 15,
+            FILE_CLOSE = 16,
+            FILE_OPEN = 17,
+            FILE_MODE = 18,
+            FILE_WRITE = 19,
+            FILE_READ = 20,
+            RECORD_NUMBER = 21,
+            FILE_LENGTH_READ = 22,
+            NOT_ASK_CACHE = 23,
+            FILE_SEEK = 24,
+            ASK_CACHE = 25,
+            STMT_ORDER = 26;
+}
