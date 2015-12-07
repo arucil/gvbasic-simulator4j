@@ -22,23 +22,23 @@ java版本的gvbasic模拟器。
 
 ## 新语法
 - 延时语句  
-        SLEEP milliseconds
+    `SLEEP milliseconds`  
     用于控制游戏的帧率。。。
 
 - 屏幕任意位置绘制字符串  
-        TEXTOUT  S$, x, y [, isSmall [, mode] ]
+    `TEXTOUT  S$, x, y [, isSmall [, mode] ]`  
     `isSmall`&nbsp;&nbsp;&nbsp;&nbsp;`=1` 小字体12x12； `=0` 大字体16x16  
     &nbsp;&nbsp;&nbsp;&nbsp;默认大字体  
     `mode`&nbsp;&nbsp;&nbsp;&nbsp;`bit2  =1` 透明; `=0` 不透明	`bit0~bit1` 同gvb绘图语句的绘图模式  
     &nbsp;&nbsp;&nbsp;&nbsp;默认不透明, OR模式
     
 - 绘制图片  
-        PAINT addr, x, y, w, h [, mode]
+    `PAINT addr, x, y, w, h [, mode]`  
     `addr`&nbsp;&nbsp;&nbsp;&nbsp;是存储图片8bit点阵数据的内存地址  
     `mode`&nbsp;&nbsp;&nbsp;&nbsp;同Lava的TextOut
 
 - 批量载入数据到内存  
-        LOAD addr, data1 [, ... ]
+    `LOAD addr, data1 [, ... ]`  
     把若干个0-255之间的数载入到addr开始的内存
 
 - 二进制文件操作  
