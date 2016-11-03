@@ -1,1 +1,0 @@
-10 cls:print chr$(252)+chr$(178)
