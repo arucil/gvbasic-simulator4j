@@ -1,4 +1,4 @@
-package core;
+package gvbsim.core;
 
 /**
  * 用于词法分析的地址类，包含字节流偏移（地址）和当前行

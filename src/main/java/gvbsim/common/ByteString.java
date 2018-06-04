@@ -1,39 +1,49 @@
-package common;
+package gvbsim.common;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
  * byte数组实现的字符串
  */
 
-public final class S implements Comparable<S> {
+public final class ByteString implements Comparable<ByteString> {
     private final byte[] b;
     private int hash;
     
-    public S() {
+    public ByteString() {
         b = new byte[0];
         calcHash();
     }
 
-    public S(String s) {
+    public ByteString(String s) {
         b = s.getBytes();
         calcHash();
     }
     
-    public S(byte[] bytes) {
+    public ByteString(byte[] bytes) {
         b = Arrays.copyOf(bytes, bytes.length);
         calcHash();
     }
     
-    public S(byte[] bytes, int begin, int end) {
+    public ByteString(byte[] bytes, int begin, int end) {
         b = Arrays.copyOfRange(bytes, begin, end);
+        calcHash();
+    }
+
+    public ByteString(byte[] bytes, boolean copy) {
+        if (copy) {
+            b = Arrays.copyOf(bytes, bytes.length);
+        } else {
+            b = bytes;
+        }
         calcHash();
     }
     
     /**
      * 创建一个1字节的字符串
      */
-    public S(byte c) {
+    public ByteString(byte c) {
         b = new byte[] {c};
         calcHash();
     }
@@ -70,11 +80,11 @@ public final class S implements Comparable<S> {
         return Arrays.copyOf(b, b.length);
     }
     
-    public S concat(S s) {
+    public ByteString concat(ByteString s) {
         return concat(this, s);
     }
     
-    public static S concat(S s1, S s2) {
+    public static ByteString concat(ByteString s1, ByteString s2) {
         byte[] b = s1.b, c = s2.b;
         int l1 = b.length, l2 = c.length;
         byte[] r = Arrays.copyOf(b, l1 + l2);
@@ -82,18 +92,18 @@ public final class S implements Comparable<S> {
         for (int i = 0; i < l2; i++) {
             r[i + l1] = c[i];
         }
-        return new S(r);
+        return new ByteString(r);
     }
     
-    public S substring(int begin) {
+    public ByteString substring(int begin) {
         return substring(begin, b.length);
     }
     
-    public S substring(int begin, int end) {
-        return new S(b, begin, end);
+    public ByteString substring(int begin, int end) {
+        return new ByteString(b, begin, end);
     }
     
-    public S toLowerCase() {
+    public ByteString toLowerCase() {
         int l = b.length;
         byte[] c = new byte[l];
         byte d;
@@ -102,10 +112,10 @@ public final class S implements Comparable<S> {
             d = b[i];
             c[i] = (byte) (d >= 'A' && d <= 'Z' ? d | 0x20 : d);
         }
-        return new S(c);
+        return new ByteString(c);
     }
     
-    public S toUpperCase() {
+    public ByteString toUpperCase() {
         int l = b.length;
         byte[] c = new byte[l];
         byte d;
@@ -114,7 +124,7 @@ public final class S implements Comparable<S> {
             d = b[i];
             c[i] = (byte) (d >= 'a' && d <= 'z' ? d & 0xdf : d);
         }
-        return new S(c);
+        return new ByteString(c);
     }
     
     public boolean contains(byte c) {
@@ -126,11 +136,11 @@ public final class S implements Comparable<S> {
     }
     
     @Override
-    public int compareTo(S o) {
+    public int compareTo(ByteString o) {
         return compare(this, o);
     }
     
-    public static int compare(S s1, S s2) {
+    public static int compare(ByteString s1, ByteString s2) {
         byte[] b = s1.b, c = s2.b;
         int l1 = b.length, l2 = c.length, min = l1 > l2 ? l2 : l1;
         
@@ -140,15 +150,23 @@ public final class S implements Comparable<S> {
         }
         return l1 - l2;
     }
-    
+
+    /**
+     * 编码是GB2312
+     * @return
+     */
     public String toString() {
-        return new String(b);
+        try {
+            return new String(b, "gb2312");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public boolean equals(Object o) {
-        if (!(o instanceof S))
+        if (!(o instanceof ByteString))
             return false;
-        S s = (S) o;
+        ByteString s = (ByteString) o;
         byte[] c = s.b;
         int l1 = b.length, l2 = c.length, min = l1 > l2 ? l2 : l1;
         

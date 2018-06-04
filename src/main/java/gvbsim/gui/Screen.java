@@ -1,12 +1,12 @@
-package gui;
+package gvbsim.gui;
 
 import javax.swing.*;
 import java.awt.image.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import io.*;
-import common.*;
+import gvbsim.io.*;
+import gvbsim.common.*;
 
 public class Screen extends JPanel implements Constants {
     BufferedImage im;

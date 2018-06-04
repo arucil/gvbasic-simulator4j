@@ -1,4 +1,4 @@
-package core;
+package gvbsim.core;
 /**
  * 变量
  * @author Amlo

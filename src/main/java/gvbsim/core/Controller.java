@@ -1,8 +1,8 @@
-package core;
+package gvbsim.core;
 
-import common.*;
-import io.*;
-import gui.*;
+import gvbsim.common.*;
+import gvbsim.io.*;
+import gvbsim.gui.*;
 
 import java.awt.event.*;
 import java.io.*;
@@ -12,7 +12,7 @@ import java.util.*;
  * 程序与用户交互的控制器
  */
 
-public class Controller implements common.Constants, GraphicalScreen, Memory {
+public class Controller implements gvbsim.common.Constants, GraphicalScreen, Memory {
     Graph g;
     Text t;
     Screen scr;
@@ -75,28 +75,19 @@ public class Controller implements common.Constants, GraphicalScreen, Memory {
     
     /**
      * 显示
-     * @param s 显示字符串。如果s=null则不调用显示函数，直接查看cr
+     * @param bytes 显示字符串。如果s=null或s为空则不调用显示函数，直接查看cr
      * @param cr 是否换行
      */
-    public void print(S s, boolean cr) {
-        if (s != null)
-            t.append(s);
+    public void print(byte[] bytes, boolean cr) {
+        if (bytes != null && bytes.length != 0)
+            t.append(bytes);
         if (cr && t.getX() > 0) //显示的文字刚好填满一行的时候就不用再换行了
             t.nextLine();
         g.setMode(Graph.COPY);
         t.update();
         scr.repaint();
     }
-    public void print(String s, boolean cr) {
-        if (s != null)
-            t.append(s);
-        if (cr && t.getX() > 0) //显示的文字刚好填满一行的时候就不用再换行了
-            t.nextLine();
-        g.setMode(Graph.COPY);
-        t.update();
-        scr.repaint();
-    }
-    
+
     public void locate(int y, int x) {
         t.setX(x);
         t.setY(y);
@@ -155,7 +146,7 @@ public class Controller implements common.Constants, GraphicalScreen, Memory {
      * <b>缺陷</b>：输入的字符串在最后一行无法换行，无法输入全角符号，无法输入图形
      * <br>Ctrl切换中英输入法
      */
-    public S input() throws InterruptedException {
+    public ByteString input() throws InterruptedException {
         try {
             int p0 = t.getPosition(), p1 = p0;
             GFont f = t.getFont();
@@ -222,7 +213,7 @@ public class Controller implements common.Constants, GraphicalScreen, Memory {
                         }
                         break;
                     case KeyEvent.VK_ENTER:
-                        return new S(t.getBuffer(), p0, p1);
+                        return new ByteString(t.getBuffer(), p0, p1);
                     case KeyEvent.VK_CONTROL:
                         inputMethod = 1;
                         setFormTitle();
@@ -249,7 +240,8 @@ public class Controller implements common.Constants, GraphicalScreen, Memory {
                     switch (k) {
                     case '1': case '2': case '3': case '4': case '5':
                         if (k <= 48 + tot && p1 < max - 1) {
-                            t.append(new String(gb, pos * 10 + ((k - 49) << 1), 2));
+                            int offset = pos * 10 + ((k - 49) << 1);
+                            t.append(gb, offset, offset + 2);
                             p1 = t.getPosition();
                             py = "";
                             g.paste(p);
@@ -289,7 +281,7 @@ public class Controller implements common.Constants, GraphicalScreen, Memory {
                         break;
                     case KeyEvent.VK_ENTER:
                         if (py.length() == 0)
-                            return new S(t.getBuffer(), p0, p1);
+                            return new ByteString(t.getBuffer(), p0, p1);
                         else if (p1 < max - py.length() + 1) {
                             for (int i = 0; i < py.length(); i++)
                                 t.poke(p1++, (byte) py.charAt(i));
@@ -466,7 +458,7 @@ public class Controller implements common.Constants, GraphicalScreen, Memory {
     }
 
     @Override
-    public void textOut(S s, int x, int y, int font, int mode) {
+    public void textOut(ByteString s, int x, int y, int font, int mode) {
         g.setMode(mode);
         g.textOut(s, x, y, font == 0);
     }

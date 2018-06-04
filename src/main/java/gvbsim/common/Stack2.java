@@ -1,4 +1,4 @@
-package common;
+package gvbsim.common;
 
 /**
  * 功能简单的栈

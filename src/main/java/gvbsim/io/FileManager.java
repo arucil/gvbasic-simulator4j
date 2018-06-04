@@ -1,7 +1,7 @@
-package io;
+package gvbsim.io;
 
 import java.io.*;
-import common.*;
+import gvbsim.common.*;
 
 /**
  * wqx文件管理器。写入内容时不会自动追加分隔符，读取时会自动跳过分隔符
@@ -194,50 +194,23 @@ public class FileManager {
         }
     }
     
-    /**
-     * 读取一个双引号括起的字符串
-     * @param fnum 文件号
-     * @return 读取到的文件。若读取失败则返回null
-     */
-    public String readString(int fnum) {
+    public ByteString readS(int fnum) {
         try {
             GFile f = files[fnum];
             if (f.read() != '"')
                 return null;
-            ByteStringBuffer b = new ByteStringBuffer();
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
             int c = 0;
             try {
                 while ((c = f.read()) != '"')
-                    b.append(c);
+                    b.write(c);
             } catch (IOException e) {
             }
             if (c != '"')
                 return null;
             else
                 f.read(); //跳过分隔符
-            return b.toString();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-    
-    public S readS(int fnum) {
-        try {
-            GFile f = files[fnum];
-            if (f.read() != '"')
-                return null;
-            ByteStringBuffer b = new ByteStringBuffer();
-            int c = 0;
-            try {
-                while ((c = f.read()) != '"')
-                    b.append(c);
-            } catch (IOException e) {
-            }
-            if (c != '"')
-                return null;
-            else
-                f.read(); //跳过分隔符
-            return b.toS();
+            return new ByteString(b.toByteArray(), false);
         } catch (Exception e) {
             return null;
         }
@@ -251,7 +224,7 @@ public class FileManager {
      */
     public boolean writeReal(double a, int fnum) {
         try {
-            files[fnum].write(common.Utilities.realToString(a).getBytes());
+            files[fnum].write(gvbsim.common.Utilities.realToString(a).getBytes());
             return true;
         } catch (Exception e) {
             return false;
@@ -343,7 +316,7 @@ public class FileManager {
         }
     }
     
-    public boolean writeQuotedS(S s, int fnum) {
+    public boolean writeQuotedS(ByteString s, int fnum) {
         try {
             files[fnum].write((byte) '"');
             files[fnum].write(s.getBytes());
@@ -361,17 +334,7 @@ public class FileManager {
      * @param fnum 文件号
      * @return 是否写入成功
      */
-    public boolean writeString(String s, int fnum) {
-        try {
-            files[fnum].write(s.getBytes());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    public boolean writeS(S s, int fnum) {
+    public boolean writeS(ByteString s, int fnum) {
         try {
             files[fnum].write(s.getBytes());
             return true;
@@ -387,16 +350,16 @@ public class FileManager {
      * @return 获取到的内容，以字符串表示
      * @throws Exception 读取错误
      */
-    String getContent(int fnum) throws Exception {
+    private String getContent(int fnum) throws Exception {
         GFile f = files[fnum];
-        ByteStringBuffer bsb = new ByteStringBuffer();
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         int c;
         try {
             while ((c = f.read()) != ',' && (c & 0xff) != 0xff)
-                bsb.append(c);
+                bout.write(c);
         } catch (IOException e) { //到文件末尾
         }
-        return bsb.toString();
+        return bout.toString();
     }
     
     /**

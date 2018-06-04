@@ -1,4 +1,4 @@
-package io;
+package gvbsim.io;
 
 public interface Memory {
     /**

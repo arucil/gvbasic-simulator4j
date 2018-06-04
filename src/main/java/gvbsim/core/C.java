@@ -1,4 +1,4 @@
-package core;
+package gvbsim.core;
 
 import java.util.*;
 

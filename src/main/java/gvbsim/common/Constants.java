@@ -1,4 +1,4 @@
-package common;
+package gvbsim.common;
 
 /**
  * 通用常数

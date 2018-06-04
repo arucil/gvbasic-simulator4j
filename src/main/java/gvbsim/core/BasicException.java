@@ -1,4 +1,4 @@
-package core;
+package gvbsim.core;
 
 /**
  * gvb解释器异常

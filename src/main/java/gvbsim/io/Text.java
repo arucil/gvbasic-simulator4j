@@ -1,6 +1,8 @@
-package io;
+package gvbsim.io;
 
-import common.*;
+import gvbsim.common.*;
+
+import java.io.UnsupportedEncodingException;
 
 public class Text implements Constants {
     int x, y; //光标位置
@@ -96,44 +98,25 @@ public class Text implements Constants {
     
     /**
      * 当前位置显示文字（符合wqx的显示）
-     * @param s 文字
      */
-    public void append(String s) {
-        byte[] txt = s.getBytes();
-        for (int i = x; i < font.COLUMN; i++) //把当前行之后的文字全清除
-            t[i + y * font.COLUMN] = 0;
-        for (int i = 0; i < txt.length; i++) {
-            if ((txt[i] & 0xff) > 0xa0 && x == font.COLUMN - 1) {
-                t[y * font.COLUMN + x] = 32;
-                x = 0;
-                y++;
-            }
-            if (y >= font.ROW)
-                moveLine();
-            t[y * font.COLUMN + x++] = txt[i];
-            if (i < txt.length - 1 && (txt[i] & 0xff) > 0xa0)
-                t[y * font.COLUMN + x++] = txt[++i];
-            if (x >= font.COLUMN) {
-                x = 0;
-                y++;
-            }
-        }
+    public void append(byte[] bytes) {
+        append(bytes, 0, bytes.length);
     }
-    public void append(S s) {
-        byte[] txt = s.getBytes();
+
+    public void append(byte[] bytes, int beginIndex, int endIndex) {
         for (int i = x; i < font.COLUMN; i++) //把当前行之后的文字全清除
             t[i + y * font.COLUMN] = 0;
-        for (int i = 0; i < txt.length; i++) {
-            if ((txt[i] & 0xff) > 0xa0 && x == font.COLUMN - 1) {
+        for (int i = beginIndex; i < endIndex; i++) {
+            if ((bytes[i] & 0xff) > 0xa0 && x == font.COLUMN - 1) {
                 t[y * font.COLUMN + x] = 32;
                 x = 0;
                 y++;
             }
             if (y >= font.ROW)
                 moveLine();
-            t[y * font.COLUMN + x++] = txt[i];
-            if (i < txt.length - 1 && (txt[i] & 0xff) > 0xa0)
-                t[y * font.COLUMN + x++] = txt[++i];
+            t[y * font.COLUMN + x++] = bytes[i];
+            if (i < bytes.length - 1 && (bytes[i] & 0xff) > 0xa0)
+                t[y * font.COLUMN + x++] = bytes[++i];
             if (x >= font.COLUMN) {
                 x = 0;
                 y++;

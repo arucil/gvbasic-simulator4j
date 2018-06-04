@@ -1,8 +1,8 @@
-package io;
+package gvbsim.io;
 
 import java.util.*;
 
-import common.*;
+import gvbsim.common.*;
 
 public class Graph implements Constants {
     public static final int COPY = 1, OR = 2, AND = 3, NOT = 4, XOR = 5;
@@ -231,7 +231,7 @@ public class Graph implements Constants {
 //        }
     }
     
-    public void textOut(S s, int x, int y, boolean isBig) {
+    public void textOut(ByteString s, int x, int y, boolean isBig) {
         GFont f = isBig ? GFont.FONT16 : GFont.FONT12;
             byte[] txt = s.getBytes();
             for (int i = 0; i < txt.length; i++) {
@@ -308,7 +308,7 @@ public class Graph implements Constants {
             x += GFont.FONT8.ASCII_WIDTH;
         }
     }
-    public void tinyTextOut(S s, int x, int y) {
+    public void tinyTextOut(ByteString s, int x, int y) {
         byte[] t = s.getBytes();
         for (int i = 0; i < t.length; i++) {
             drawTinyChar((char) (t[i] & 0x7f), x, y);

@@ -1,4 +1,4 @@
-package core;
+package gvbsim.core;
 
 public interface E {
     public static final int SYNTAX = 1,

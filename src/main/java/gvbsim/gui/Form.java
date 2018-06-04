@@ -1,8 +1,8 @@
-package gui;
+package gvbsim.gui;
 
-import io.*;
-import core.*;
-import common.*;
+import gvbsim.io.*;
+import gvbsim.core.*;
+import gvbsim.common.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -101,8 +101,7 @@ public class Form extends JFrame implements ActionListener {
         vartable.addMouseListener(new VarListener());
         
         pack();
-        Dimension sz = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(new Point((sz.width - getWidth()) / 2, (int) ((sz.height - getHeight()) * .309)));
+        setLocationRelativeTo(null);
         setVisible(true);
         
         jf.setCurrentDirectory(new File("bas"));
@@ -152,11 +151,12 @@ public class Form extends JFrame implements ActionListener {
         return title;
     }
     
-    TButton btnLoad = new TButton("打开"), btnRun = new TButton("运行"), btnHack = new TButton("变量"),
-            btnCap = new TButton("截图"), btnImage = new TButton("图形浏览");
+    JButton btnLoad = new JButton("打开"), btnRun = new JButton("运行"), btnHack = new JButton("变量"),
+            btnCap = new JButton("截图"), btnImage = new JButton("图形浏览");
     
     Thread exec;
-    
+
+    @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
         case "打开":
@@ -310,7 +310,7 @@ public class Form extends JFrame implements ActionListener {
                             return "实数数组";
                         else if (v instanceof Integer[])
                             return "整数数组";
-                        else if (v instanceof S[])
+                        else if (v instanceof ByteString[])
                             return "字符串数组";
                         else
                             return "未知类型数组";
@@ -364,7 +364,7 @@ public class Form extends JFrame implements ActionListener {
                         }
                         break;
                     case Id.STRING:
-                        b.vars.put(id, new S(s));
+                        b.vars.put(id, new ByteString(s));
                     }
                 }
             }
@@ -373,7 +373,7 @@ public class Form extends JFrame implements ActionListener {
             JSpinner[] sp;
             Array<?> arry;
             JTextField tf = new JTextField(6);
-            TButton b = new TButton("确定");
+            JButton b = new JButton("确定");
             
             public ArrayHacker(String name, Array<?> arr) {
                 super(Form.this, "", true);
@@ -423,7 +423,7 @@ public class Form extends JFrame implements ActionListener {
                             e1.printStackTrace();
                         }
                     } else {
-                        ((Array<S>) arry).value[t] = new S(tf.getText());
+                        ((Array<ByteString>) arry).value[t] = new ByteString(tf.getText());
                     }
                 }
                 dispose();

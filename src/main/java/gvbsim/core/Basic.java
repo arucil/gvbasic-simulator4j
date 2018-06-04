@@ -1,9 +1,9 @@
-package core;
+package gvbsim.core;
 
-import gui.*;
-import io.*;
-import common.*;
-import static common.Utilities.*;
+import gvbsim.gui.*;
+import gvbsim.io.*;
+import gvbsim.common.*;
+import static gvbsim.common.Utilities.*;
 
 import java.io.*;
 import java.util.*;
@@ -518,7 +518,7 @@ public class Basic {
                 error(E.REDIM_ARRAY);
             switch (s.charAt(s.length() - 1)) {
             case '$':
-                ar = new Array<S>();
+                ar = new Array<ByteString>();
                 break;
             case '%':
                 ar = new Array<Integer>();
@@ -543,10 +543,10 @@ public class Basic {
             switch (s.charAt(s.length() - 1)) {
             case '$':
                 @SuppressWarnings("unchecked")
-                Array<S> ar2 = (Array<S>) ar;
-                ar2.value = new S[ar.base[i] * (ar.bound[i] + 1)];
+                Array<ByteString> ar2 = (Array<ByteString>) ar;
+                ar2.value = new ByteString[ar.base[i] * (ar.bound[i] + 1)];
                 for (i = 0; i < ar.value.length; i++)
-                    ar2.value[i] = new S();
+                    ar2.value[i] = new ByteString();
                 break;
             case '%':
                 @SuppressWarnings("unchecked")
@@ -598,7 +598,7 @@ public class Basic {
             synchronized (arr) {
                 switch (type) {
                 case Id.STRING:
-                    ((Array<S>) arr).value[index] = (S) val;
+                    ((Array<ByteString>) arr).value[index] = (ByteString) val;
                     break;
                 case Id.INTEGER:
                     ((Array<Integer>) arr).value[index] = (Integer) val;
@@ -644,7 +644,7 @@ public class Basic {
             a.put((int) (double) expr(E_NUMBER));
             break;
         case Id.STRING:
-            a.put((S) expr(E_STRING));
+            a.put((ByteString) expr(E_STRING));
             break;
         default:
             a.put((Double) expr(E_NUMBER));
@@ -671,7 +671,7 @@ public class Basic {
                         if (pt < 1 || pt > 20) //大字体
                             error(E.ILLEGAL_QUANTITY);
                         if (scr.getX() >= pt)
-                            scr.print((S) null, true);
+                            scr.print((ByteString) null, true);
                         scr.locate(scr.getY(), pt - 1);
                         ps = null;
                     } else {
@@ -684,7 +684,7 @@ public class Basic {
                         if (pt > 0) {
                             pb = new byte[pt];
                             Arrays.fill(pb, (byte) 32);
-                            ps = new S(pb);
+                            ps = new ByteString(pb);
                         } else
                             ps = null;
                     }
@@ -694,20 +694,20 @@ public class Basic {
                 ps = null;
             cr = tok == ',' || tok == ':' || tok == 0xa || tok == -1 || tok == C.ELSE;
             if (ps instanceof Double)
-                scr.print(realToString((Double) ps), cr);
+                scr.print(realToString((Double) ps).getBytes(), cr);
             else
-                scr.print((S) ps, cr);
+                scr.print((ByteString) ps, cr);
             if (tok == ';' || tok == ',')
                 peek();
         }
-        scr.print((S) null, false);
+        scr.print((byte[]) null, false);
     }
     
-    String iprm;
     Access iacc;
     Integer ishr;
     Double idbl;
-    S ss, iinp;
+    ByteString ss, iinp;
+
     /**
      * 文件或屏幕输入
      * <br>input [#n / str$], id / id$ [, ...]
@@ -746,19 +746,20 @@ public class Basic {
                     break;
             }
         } else { //屏幕读取
+            ByteString prompt;
             if (tok == C.STRING) {
-                iprm = l.sval;
+                prompt = l.bsval;
                 peek();
                 match(';');
             } else
-                iprm = null;
+                prompt = null;
             iacc = getAccess();
             while (true) {
-                if (iprm != null) {
-                    scr.print(iprm, false);
-                    iprm = null;
+                if (prompt != null) {
+                    scr.print(prompt, false);
+                    prompt = null;
                 } else
-                    scr.print("?", false);
+                    scr.print(new byte[] { '?' }, false);
                 iinp = scr.input();
                 switch (iacc.type) {
                 case Id.INTEGER:
@@ -1278,7 +1279,7 @@ public class Basic {
      */
     void exe_textout() throws BasicException, InterruptedException {
         peek();
-        ss = (S) expr(E_STRING);
+        ss = (ByteString) expr(E_STRING);
         match(',');
         x1 = (int) (double) expr(E_NUMBER);
         match(',');
@@ -1343,11 +1344,11 @@ public class Basic {
         peek();
         iacc = getAccess(E_STRING);
         match('=');
-        pb = ((S) expr(E_STRING)).getBytes();
-        byte[] pb2 = ((S) iacc.get()).getBytes();
+        pb = ((ByteString) expr(E_STRING)).getBytes();
+        byte[] pb2 = ((ByteString) iacc.get()).getBytes();
         for (int i = 0, j = pb.length > pb2.length ? pb2.length : pb.length; i < j; i++)
             pb2[i] = pb[i];
-        iacc.put(new S(pb2));
+        iacc.put(new ByteString(pb2));
     }
     
     /**
@@ -1358,11 +1359,11 @@ public class Basic {
         peek();
         iacc = getAccess(E_STRING);
         match('=');
-        pb = ((S) expr(E_STRING)).getBytes();
-        byte[] pb2 = ((S) iacc.get()).getBytes();
+        pb = ((ByteString) expr(E_STRING)).getBytes();
+        byte[] pb2 = ((ByteString) iacc.get()).getBytes();
         for (int i = pb2.length - 1, j = pb.length - 1; i >= 0 && j >= 0; i--, j--)
             pb2[i] = pb[j];
-        iacc.put(new S(pb2));
+        iacc.put(new ByteString(pb2));
     }
     
     /**
@@ -1390,9 +1391,9 @@ public class Basic {
      */
     void exe_open() throws BasicException, InterruptedException {
         peek();
-        ss = (S) expr(E_STRING);
+        ss = (ByteString) expr(E_STRING);
         if (!ss.contains((byte) '.'))
-            ss = ss.concat(new S(".dat"));
+            ss = ss.concat(new ByteString(".dat"));
         match(C.FOR);
         pt = tok;
         if (tok != C.INPUT && tok != C.OUTPUT && tok != C.APPEND && tok != C.RANDOM && tok != C.BINARY)
@@ -1460,8 +1461,8 @@ public class Basic {
         match(',');
         while (true) {
             fo = expr();
-            if (fo instanceof S)
-                fm.writeQuotedS((S) fo, pt);
+            if (fo instanceof ByteString)
+                fm.writeQuotedS((ByteString) fo, pt);
             else
                 fm.writeReal((Double) fo, pt);
             if (tok == ',') {
@@ -1504,7 +1505,7 @@ public class Basic {
                 error(E.SYNTAX);
             fil.add(x1);
             fal.add(iacc);
-            iacc.put(new S(new byte[x1])); //字符串用0填充
+            iacc.put(new ByteString(new byte[x1])); //字符串用0填充
             rec.total += x1;
             if (tok == ',')
                 peek();
@@ -1536,7 +1537,7 @@ public class Basic {
         if (!fm.seek(rec.total * x1, pt))
             error(E.RECORD_NUMBER);
         for (x2 = 0; x2 < rec.size.length; x2++) {
-            if (!fm.writeBytes(Arrays.copyOf(((S) rec.acc[x2].get()).getBytes(), rec.size[x2]), pt))
+            if (!fm.writeBytes(Arrays.copyOf(((ByteString) rec.acc[x2].get()).getBytes(), rec.size[x2]), pt))
                 error(E.FILE_WRITE);
         }
     }
@@ -1562,7 +1563,7 @@ public class Basic {
             pb = fm.readBytes(rec.size[x2], pt);
             if (pb == null)
                 error(E.FILE_READ);
-            rec.acc[x2].put(new S(pb));
+            rec.acc[x2].put(new ByteString(pb));
         }
     }
     
@@ -1661,12 +1662,12 @@ public class Basic {
                 iacc.put(Double.longBitsToDouble(fln));
                 break;
             default:
-                ss = (S) iacc.get();
+                ss = (ByteString) iacc.get();
                 if (ss.length() > 0) {
                     pb = fm.readBytes(ss.length(), pt);
                     if (pb == null)
                         error(E.FILE_READ);
-                    iacc.put(new S(pb));
+                    iacc.put(new ByteString(pb));
                 }
             }
             if (tok == ',')
@@ -1705,7 +1706,7 @@ public class Basic {
                 }
                 break;
             default:
-                pb = ((S) iacc.get()).getBytes();
+                pb = ((ByteString) iacc.get()).getBytes();
                 if (pb.length > 0 && !fm.writeBytes(pb, pt))
                     error(E.FILE_WRITE);
             }
@@ -1736,7 +1737,7 @@ public class Basic {
                 if (!fm.writeByte((int) (double) fo, pt))
                     error(E.FILE_WRITE);
             } else {
-                if (!fm.writeByte(((S) fo).byteAt(0), pt))
+                if (!fm.writeByte(((ByteString) fo).byteAt(0), pt))
                     error(E.FILE_WRITE);
             }
             if (tok == ',')
@@ -1820,7 +1821,7 @@ public class Basic {
                 base = d = 1;
                 switch (s.charAt(s.length() - 1)) {
                 case '$':
-                    Array<S> sar = new Array<>();
+                    Array<ByteString> sar = new Array<>();
                     while (true) {
                         t = (int) (double) expr(E_NUMBER);
                         if (t > 10 || t < 0)
@@ -1843,9 +1844,9 @@ public class Basic {
                         base *= 11;
                         sar.bound[i] = 10;
                     }
-                    sar.value = new S[base];
+                    sar.value = new ByteString[base];
                     for (int i = 0; i < base; i++)
-                        sar.value[i] = new S();
+                        sar.value[i] = new ByteString();
                     synchronized (vars) {
                         vars.put(id, sar);
                         frm.vartable.revalidate();
@@ -1923,7 +1924,7 @@ public class Basic {
             switch (s.charAt(s.length() - 1)) { //获取数组下标
             case '$':
                 @SuppressWarnings("unchecked")
-                Array<S> sar = (Array<S>) vars.get(id);
+                Array<ByteString> sar = (Array<ByteString>) vars.get(id);
                 for (int i = 0; i < sar.bound.length; i++) {
                     t = (int) (double) expr(E_NUMBER);
                     if (t > sar.bound[i] || t < 0)
@@ -1979,7 +1980,7 @@ public class Basic {
                         vars.put(id, 0);
                         break;
                     case Id.STRING:
-                        vars.put(id, new S());
+                        vars.put(id, new ByteString());
                         break;
                     default:
                         vars.put(id, 0d);
@@ -1999,8 +2000,8 @@ public class Basic {
      */
     Object expr(int type) throws BasicException, InterruptedException {
         Object r = E(0);
-        if (type == E_NUMBER && r instanceof S ||
-                type == E_STRING && !(r instanceof S))
+        if (type == E_NUMBER && r instanceof ByteString ||
+                type == E_STRING && !(r instanceof ByteString))
             error(E.TYPE_MISMATCH);
         return r;
     }
@@ -2036,7 +2037,7 @@ public class Basic {
         
         Object o = null;
         String s;
-        S s2;
+        ByteString s2;
         int t, t2;
         long lt;
         byte[] b;
@@ -2047,10 +2048,11 @@ public class Basic {
             Double r = l.rval;
             peek();
             return r;
-        case C.STRING:
-            s = l.sval;
+        case C.STRING: {
+            ByteString bs = l.bsval;
             peek();
-            return new S(s);
+            return bs;
+        }
         case C.ID:
             if (infuns.contains(l.sval)) { //内置函数
                 s = l.sval;
@@ -2061,7 +2063,7 @@ public class Basic {
                     o = Math.abs((Double) expr(E_NUMBER));
                     break;
                 case C.ASC: //ascii码，字符串长度为0则返回0
-                    s2 = (S) expr(E_STRING);
+                    s2 = (ByteString) expr(E_STRING);
                     if (s2.length() == 0)
                         o = 0d;
                     else
@@ -2071,21 +2073,21 @@ public class Basic {
                     o = Math.atan((Double) expr(E_NUMBER));
                     break;
                 case C.CHR: //ascii码转为字符串，取低八位。有问题：如果bit7=1，则会自动转换为问号
-                    o = new S((byte) (double) expr(E_NUMBER));
+                    o = new ByteString((byte) (double) expr(E_NUMBER));
                     break;
                 case C.COS: //余弦值
                     o = Math.cos((Double) expr(E_NUMBER));
                     break;
                 case C.CVI: //字符串前2byte转为整数.little endian
-                    b = Arrays.copyOf(((S) expr(E_STRING)).getBytes(), 2);
+                    b = Arrays.copyOf(((ByteString) expr(E_STRING)).getBytes(), 2);
                     o = (double) ((b[0] & 0xff) + ((b[1] & 0xff) << 8));
                     break;
                 case C.MKI: //整数转换为2byte字符串
                     t = (int) (double) expr(E_NUMBER);
-                    o = new S(new byte[] {(byte) t, (byte) (t >>> 8)});
+                    o = new ByteString(new byte[] {(byte) t, (byte) (t >>> 8)});
                     break;
                 case C.CVS: //字符串前8字节转换为double
-                    b = Arrays.copyOf(((S) expr(E_STRING)).getBytes(), 8);
+                    b = Arrays.copyOf(((ByteString) expr(E_STRING)).getBytes(), 8);
                     for (lt = t = 0; t < 8; t++) {
                         lt |= b[7 - t];
                         lt <<= 8;
@@ -2099,7 +2101,7 @@ public class Basic {
                         b[t] = (byte) lt;
                         lt >>>= 8;
                     }
-                    o = new S(b);
+                    o = new ByteString(b);
                     break;
                 case C.EXP: //e的n次方
                     o = Math.exp((Double) expr(E_NUMBER));
@@ -2108,7 +2110,7 @@ public class Basic {
                     o = Math.floor((Double) expr(E_NUMBER));
                     break;
                 case C.LEFT: //取字符串的前n字节
-                    s2 = (S) expr(E_STRING);
+                    s2 = (ByteString) expr(E_STRING);
                     b = s2.getBytes();
                     match(',');
                     t = (int) (double) expr(E_NUMBER);
@@ -2116,16 +2118,16 @@ public class Basic {
                         error(E.ILLEGAL_QUANTITY);
                     if (t > b.length)
                         t = b.length;
-                    o = new S(b, 0, t);
+                    o = new ByteString(b, 0, t);
                     break;
                 case C.LEN: //字符串长（字节）
-                    o = (double) ((S) expr(E_STRING)).length();
+                    o = (double) ((ByteString) expr(E_STRING)).length();
                     break;
                 case C.LOG: //ln
                     o = Math.log((Double) expr(E_NUMBER));
                     break;
                 case C.MID: //取字符串第m个字节开始的n字节，若省略n则n=1
-                    s2 = (S) expr(E_STRING);
+                    s2 = (ByteString) expr(E_STRING);
                     b = s2.getBytes();
                     match(',');
                     t = (int) (double) expr(E_NUMBER) - 1;
@@ -2136,14 +2138,14 @@ public class Basic {
                         t2 = 1;
                     if (t >= b.length || t < 0 || t2 < 1)
                         error(E.ILLEGAL_QUANTITY);
-                    o = new S(b, t, t + t2);
+                    o = new ByteString(b, t, t + t2);
                     break;
                 case C.POS: //获取光标横坐标。参数没用
                     expr(E_NUMBER);
                     o = (double) (scr.getX() + 1);
                     break;
                 case C.RIGHT: //取字符串后n个字节
-                    s2 = (S) expr(E_STRING);
+                    s2 = (ByteString) expr(E_STRING);
                     b = s2.getBytes();
                     match(',');
                     t = (int) (double) expr(E_NUMBER);
@@ -2151,7 +2153,7 @@ public class Basic {
                         error(E.ILLEGAL_QUANTITY);
                     if (t > b.length)
                         t = b.length;
-                    o = new S(b, b.length - t, b.length);
+                    o = new ByteString(b, b.length - t, b.length);
                     break;
                 case C.RND: //随机数，若参数为0则返回上一个随机数
                     if (doubleIsZero((Double) expr(E_NUMBER)))
@@ -2170,7 +2172,7 @@ public class Basic {
                     o = Math.sqrt((Double) expr(E_NUMBER));
                     break;
                 case C.STR: //实数转字符串
-                    o = new S(realToString((Double) expr(E_NUMBER)));
+                    o = new ByteString(realToString((Double) expr(E_NUMBER)));
                     break;
                 case C.TAN:
                     o = Math.tan((Double) expr(E_NUMBER));
@@ -2246,7 +2248,7 @@ public class Basic {
             return doubleIsZero((Double) o) ? 1d : 0d;
         case C.INKEY:
             peek();
-            return new S((byte) convertKeyCode(frm.inkey(false)));
+            return new ByteString((byte) convertKeyCode(frm.inkey(false)));
         case '(':
             peek();
             Object ooo = E(0);
@@ -2300,8 +2302,8 @@ public class Basic {
         case '+':
             if (a instanceof Double && b instanceof Double)
                 return (Double) a + (Double) b;
-            else if (a instanceof S && b instanceof S)
-                return S.concat((S) a, (S) b);
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ByteString.concat((ByteString) a, (ByteString) b);
             break;
         case '-':
             if (a instanceof Double && b instanceof Double)
@@ -2326,39 +2328,39 @@ public class Basic {
             if (a instanceof Double && b instanceof Double)
                 return Double.compare((Double) a, (Double) b) > 0 ||
                         doubleEqual((Double) a, (Double) b) ? 1d : 0d;
-            else if (a instanceof S && b instanceof S)
-                return ((S) a).compareTo((S) b) >= 0 ? 1d : 0d;
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ((ByteString) a).compareTo((ByteString) b) >= 0 ? 1d : 0d;
             break;
         case C.LTE:
             if (a instanceof Double && b instanceof Double)
                 return Double.compare((Double) a, (Double) b) < 0 ||
                         doubleEqual((Double) a, (Double) b) ? 1d : 0d;
-            else if (a instanceof S && b instanceof S)
-                return ((S) a).compareTo((S) b) <= 0 ? 1d : 0d;
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ((ByteString) a).compareTo((ByteString) b) <= 0 ? 1d : 0d;
             break;
         case '>':
             if (a instanceof Double && b instanceof Double)
                 return Double.compare((Double) a, (Double) b) > 0 ? 1d : 0d;
-            else if (a instanceof S && b instanceof S)
-                return ((S) a).compareTo((S) b) > 0 ? 1d : 0d;
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ((ByteString) a).compareTo((ByteString) b) > 0 ? 1d : 0d;
             break;
         case '<':
             if (a instanceof Double && b instanceof Double)
                 return Double.compare((Double) a, (Double) b) < 0 ? 1d : 0d;
-            else if (a instanceof S && b instanceof S)
-                return ((S) a).compareTo((S) b) < 0 ? 1d : 0d;
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ((ByteString) a).compareTo((ByteString) b) < 0 ? 1d : 0d;
             break;
         case '=':
             if (a instanceof Double && b instanceof Double)
                 return doubleEqual((Double) a, (Double) b) ? 1d : 0d;
-            else if (a instanceof S && b instanceof S)
-                return ((S) a).equals(b) ? 1d : 0d;
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ((ByteString) a).equals(b) ? 1d : 0d;
             break;
         case C.NEQ:
             if (a instanceof Double && b instanceof Double)
                 return doubleEqual((Double) a, (Double) b) ? 0d : 1d;
-            else if (a instanceof S && b instanceof S)
-                return ((S) a).equals(b) ? 0d : 1d;
+            else if (a instanceof ByteString && b instanceof ByteString)
+                return ((ByteString) a).equals(b) ? 0d : 1d;
             break;
         case C.OR:
             if (a instanceof Double && b instanceof Double)
@@ -2514,7 +2516,7 @@ class Pack {
     }
     
     public String toString() {
-        return "[P " + addr + " S:" + stmt + "]";
+        return "[P " + addr + " ByteString:" + stmt + "]";
     }
 }
 
@@ -2588,67 +2590,45 @@ class DataReader {
     }
     
     int c;
-    ByteStringBuffer bsb = new ByteStringBuffer();
-    
-    public String readString() throws BasicException {
+
+    public ByteString readS() throws BasicException {
         peek();
-        bsb.clear();
         if (c == -1)
             throw new BasicException(E.OUT_OF_DATA);
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         if (c == '"') {
             peek();
             while (c != '"' && c != -1) {
-                bsb.append(c);
+                bout.write(c);
                 peek();
             }
             if (c == '"') //跳过逗号
                 peek();
         } else {
             while (c != ',') {
-                bsb.append(c);
+                bout.write(c);
                 peek();
             }
         }
-        return bsb.toString();
-    }
-    
-    public S readS() throws BasicException {
-        peek();
-        bsb.clear();
-        if (c == -1)
-            throw new BasicException(E.OUT_OF_DATA);
-        if (c == '"') {
-            peek();
-            while (c != '"' && c != -1) {
-                bsb.append(c);
-                peek();
-            }
-            if (c == '"') //跳过逗号
-                peek();
-        } else {
-            while (c != ',') {
-                bsb.append(c);
-                peek();
-            }
-        }
-        return bsb.toS();
+        return new ByteString(bout.toByteArray(), false);
     }
     
     String s;
     
     public double readDouble() throws BasicException {
         peek();
-        bsb.clear();
         if (c == -1)
             throw new BasicException(E.OUT_OF_DATA);
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         while (c != ',') {
-            bsb.append(c);
+            bout.write(c);
             peek();
         }
-        s = bsb.toString();
-        if (s.length() > 0) {
+        if (bout.size() > 0) {
             try {
-                return Double.parseDouble(s);
+                return Double.parseDouble(bout.toString());
             } catch (NumberFormatException e) {
                 throw new BasicException(E.SYNTAX);
             }

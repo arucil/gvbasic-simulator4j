@@ -1,9 +1,9 @@
-package core;
+package gvbsim.core;
 
 import java.util.*;
 import java.io.*;
-import static common.Utilities.*;
-import common.*;
+import static gvbsim.common.Utilities.*;
+import gvbsim.common.*;
 
 /**
  * basic词法分析器
@@ -19,6 +19,7 @@ public class Lexer {
     int ival;
     double rval;
     String sval;
+    ByteString bsval;
     
     public Lexer(InputStream in) throws IOException {
             try {
@@ -146,61 +147,63 @@ public class Lexer {
             if (getc('='))
                 return tok = C.GTE;
             return tok = '>';
-        case '"':
-            ByteStringBuffer bsb = new ByteStringBuffer(255);
+        case '"': {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream(255);
             while (peek() != '"' && c != 0xd && c != 0xa && c != -1) {
-                bsb.append(c);
+                bout.write(c);
             }
             if (c == '"')
                 peek();
-            sval = bsb.toString();
+            bsval = new ByteString(bout.toByteArray());
             return tok = C.STRING;
+        }
         default:
             try {
                 if (c >= '0' && c <= '9' || c == '.') {
-                    ByteStringBuffer bsb2 = new ByteStringBuffer();
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
                     while (c >= '0' && c <= '9') {
-                        bsb2.append(c);
+                        bout.write(c);
                         peek();
                     }
                     if (c != '.' && c != 'E' && c != 'e') {
-                        rval = ival = Integer.parseInt(bsb2.toString());
+                        rval = ival = Integer.parseInt(bout.toString());
                         return tok = C.INTEGER;
                     }
                     if (c == '.')
                         do {
-                            bsb2.append(c);
+                            bout.write(c);
                         } while (peek() >= '0' && c <= '9');
                     if (c == 'E' || c == 'e') {
-                        bsb2.append(0x45);
+                        bout.write('E');
                         peek();
                         if (c == '+' || c == '-') {
-                            bsb2.append(c);
+                            bout.write(c);
                             peek();
                         }
                         while (c >= '0' && c <= '9') {
-                            bsb2.append(c);
+                            bout.write(c);
                             peek();
                         }
                     }
-                    rval = Double.parseDouble(bsb2.toString());
+                    rval = Double.parseDouble(bout.toString());
                     return tok = C.REAL;
                 }
             } catch (NumberFormatException e) {
                 e.printStackTrace();
                 throw new BasicException(E.SYNTAX);
             }
+
             if (isAlpha(c)) {
-                ByteStringBuffer bsb3 = new ByteStringBuffer();
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 do {
-                    bsb3.append(toLowerCase(c));
+                    bout.write(toLowerCase(c));
                 } while (isWord(peek()));
                 if (c == '%' || c == '$') {
-                    bsb3.append((byte) c);
+                    bout.write((byte) c);
                     peek();
                 }
-                sval = bsb3.toString();
-                Integer i = keyword.get(sval.toString());
+                sval = new String(bout.toByteArray());
+                Integer i = keyword.get(sval);
                 if (i != null)
                     return tok = i;
                 return tok = C.ID;
@@ -224,7 +227,7 @@ public class Lexer {
         case C.ID:
             return line + ": <ID, " + sval + ">";
         case C.STRING:
-            return line + ": <String, \"" + sval + "\">";
+            return line + ": <String, \"" + bsval + "\">";
         case C.REAL:
             return line + ": <Real, " + rval + ">";
         case C.INTEGER:
@@ -243,7 +246,6 @@ public class Lexer {
     }
     
     public static void main(String[] args) throws Exception {
-        // TODO Auto-generated method stub
         InputStream i = new BufferedInputStream(new FileInputStream("bas/1.txt"));
         Lexer l = new Lexer(i);
         System.setOut(new PrintStream(new File("s.txt")));

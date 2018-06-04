@@ -1,4 +1,4 @@
-package io;
+package gvbsim.io;
 
 import java.io.*;
 import java.util.*;

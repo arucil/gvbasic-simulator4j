@@ -24,7 +24,7 @@
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package common;
+package gvbsim.common;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,7 +58,7 @@ import java.util.StringTokenizer;
  * file. The <code>{@link IniEditor.Section}</code> class can be used to load
  * configuration files without sections (ie Java-style properties).
  * <p>
- * A "common section" may be named. All sections inherit the options of this
+ * A "gvbsim.common section" may be named. All sections inherit the options of this
  * section but can overwrite them.
  * <p>
  * <code>IniEditor</code> represents an INI file (or rather, its sections) line
@@ -156,20 +156,20 @@ public class IniEditor {
     }
 
     /**
-     * Constructs new IniEditor instance with a common section. Options in the
-     * common section are used as defaults for all other sections.
+     * Constructs new IniEditor instance with a gvbsim.common section. Options in the
+     * gvbsim.common section are used as defaults for all other sections.
      *
-     * @param commonName name of the common section
+     * @param commonName name of the gvbsim.common section
      */
     public IniEditor(String commonName) {
         this(commonName, null);
     }
 
     /**
-     * Constructs new IniEditor instance with a common section. Options in the
-     * common section are used as defaults for all other sections.
+     * Constructs new IniEditor instance with a gvbsim.common section. Options in the
+     * gvbsim.common section are used as defaults for all other sections.
      *
-     * @param commonName name of the common section
+     * @param commonName name of the gvbsim.common section
      * @param isCaseSensitive section and option names are case-sensitive if
      *    this is true
      */
@@ -202,11 +202,11 @@ public class IniEditor {
     }
 
     /**
-     * Constructs new IniEditor instance with a common section, defining
-     * comment delimiters. Options in the common section are used as defaults
+     * Constructs new IniEditor instance with a gvbsim.common section, defining
+     * comment delimiters. Options in the gvbsim.common section are used as defaults
      * for all other sections.
      *
-     * @param commonName name of the common section
+     * @param commonName name of the gvbsim.common section
      * @param delims an array of characters to be recognized as starters of
      *    comment lines; the first of them will be used for newly created
      *    comments
@@ -216,11 +216,11 @@ public class IniEditor {
     }
 
     /**
-     * Constructs new IniEditor instance with a common section, defining
-     * comment delimiters. Options in the common section are used as defaults
+     * Constructs new IniEditor instance with a gvbsim.common section, defining
+     * comment delimiters. Options in the gvbsim.common section are used as defaults
      * for all other sections.
      *
-     * @param commonName name of the common section
+     * @param commonName name of the gvbsim.common section
      * @param delims an array of characters to be recognized as starters of
      *    comment lines; the first of them will be used for newly created
      *    comments
@@ -261,7 +261,7 @@ public class IniEditor {
 
     /**
      * Returns the value of a given option in a given section or null if either
-     * the section or the option don't exist. If a common section was defined
+     * the section or the option don't exist. If a gvbsim.common section was defined
      * options are also looked up there if they're not present in the specific
      * section.
      *
@@ -306,7 +306,7 @@ public class IniEditor {
 
     /**
      * Removes an option from a section if it exists. Will not remove options
-     * from the common section if it's not directly addressed.
+     * from the gvbsim.common section if it's not directly addressed.
      *
      * @param section the section's name
      * @param option the option's name
@@ -323,7 +323,7 @@ public class IniEditor {
 
     /**
      * Checks whether an option exists in a given section. Options in the
-     * common section are assumed to not exist in particular sections,
+     * gvbsim.common section are assumed to not exist in particular sections,
      * unless they're overwritten.
      *
      * @param section the section's name
@@ -371,12 +371,12 @@ public class IniEditor {
      *
      * @param name the section's name
      * @return <code>true</code> if the section actually existed
-     * @throws IllegalArgumentException when trying to remove the common section
+     * @throws IllegalArgumentException when trying to remove the gvbsim.common section
      */
     public boolean removeSection(String name) {
         String normName = normSection(name);
         if (this.commonName != null && this.commonName.equals(normName)) {
-            throw new IllegalArgumentException("Can't remove common section");
+            throw new IllegalArgumentException("Can't remove gvbsim.common section");
         }
         if (hasSection(normName)) {
             this.sections.remove(normName);
@@ -388,7 +388,7 @@ public class IniEditor {
     }
 
     /**
-     * Returns all section names in this instance minus the common section if
+     * Returns all section names in this instance minus the gvbsim.common section if
      * one was defined.
      *
      * @return list of the section names in original/insertion order
@@ -403,7 +403,7 @@ public class IniEditor {
 
     /**
      * Returns all option names of a section, not including options from the
-     * common section.
+     * gvbsim.common section.
      *
      * @param section the section's name
      * @return list of option names
